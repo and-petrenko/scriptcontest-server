@@ -1,7 +1,5 @@
 package org.scriptcontest.server.python;
 
-import org.python.core.PyArray;
-import org.python.core.PyInteger;
 import org.python.core.PyList;
 import org.python.util.PythonInterpreter;
 import org.springframework.stereotype.Service;
@@ -13,16 +11,14 @@ import java.io.StringWriter;
 @Service
 public class PythonService {
 
-  public int[][] getArray(){
+  public int[][] getShipsPosition(String file){
     try (PythonInterpreter pi = new PythonInterpreter()) {
       StringWriter output = new StringWriter();
       pi.setOut(output);
-
-      try (InputStream inputStream = PythonService.class.getClassLoader().getResourceAsStream("./python/array.py")) {
+      try (InputStream inputStream = PythonService.class.getClassLoader().getResourceAsStream("./python/" + file)) {
         pi.execfile(inputStream);
         pi.exec("result = getShipsPosition()");
         PyList result = (PyList) pi.get("result");
-        System.out.println("result: " + result);
         return convertToArray(result);
       } catch (IOException e) {
         throw new RuntimeException(e);
