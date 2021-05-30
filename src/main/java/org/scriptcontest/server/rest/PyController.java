@@ -1,6 +1,7 @@
 package org.scriptcontest.server.rest;
 
 import lombok.AllArgsConstructor;
+import org.scriptcontest.server.dto.PlayResult;
 import org.scriptcontest.server.python.PythonService;
 import org.scriptcontest.server.service.SeaWarService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class PyController {
   }
 
   @GetMapping("/battle")
-  public int doBattle() {
+  public PlayResult doBattle() {
     return seaWarService.doBattle();
   }
 

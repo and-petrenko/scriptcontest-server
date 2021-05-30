@@ -1,30 +1,70 @@
 package org.scriptcontest.server.service;
 
 import lombok.AllArgsConstructor;
+import org.scriptcontest.server.dto.Coords;
+import org.scriptcontest.server.dto.PlayResult;
 import org.scriptcontest.server.python.PythonService;
 import org.springframework.stereotype.Service;
 
+/**
+ * Состояние клеток:
+ * 0 - пустая
+ * 1 - кораблик (живой)
+ * 2 - кораблик (потопленный)
+ * 3 - выстрел мимо
+ */
 @Service
 @AllArgsConstructor
 public class SeaWarServiceImpl implements SeaWarService {
 
+  public static final int CELL_EMPTY = 0;
+  public static final int CELL_SHIP = 1;
+  public static final int CELL_INJURED = 2;
+  public static final int CELL_MISSED = 3;
+
   private PythonService pythonService;
 
   @Override
-  public int doBattle() {
-    int[][] area1 = pythonService.getShipsPosition("array.py");
+  public PlayResult doBattle() {
+    Player p1 = new Player("array.py", pythonService);
+    Player p2 = new Player("array2.py", pythonService);
+
+    int[][] area1 = p1.getShipsPosition();
     printArea(area1);
     if (!checkArea(area1)) {
-      return 2;
+      return new PlayResult(2, "Player 1 filled ships in wrong way");
     }
 
-    int[][] area2 = pythonService.getShipsPosition("array2.py");
+    int[][] area2 = p2.getShipsPosition();
     if (!checkArea(area2)) {
-      return 1;
+      return new PlayResult(1, "Player 1 filled ships in wrong way");
     }
 
+    Coords coords = p1.fire(area2);
 
-    return 3;
+    System.out.println("!!! fire=" + coords);
+
+    int newState = executeFire(coords, area2);
+    if (newState == CELL_INJURED) {
+      // еще раз
+    } else if (newState == CELL_MISSED) {
+      // передаем управление
+    }
+
+    return new PlayResult(0, "We don't kow who won yet");
+  }
+
+  private int executeFire(Coords coords, int[][] area) {
+    int currentState = area[coords.getX()][coords.getY()];
+    if (currentState == CELL_SHIP) {
+      area[coords.getX()][coords.getY()] = CELL_INJURED;
+      return CELL_INJURED;
+    } else if (currentState == CELL_EMPTY) {
+      area[coords.getX()][coords.getY()] = CELL_MISSED;
+      return CELL_MISSED;
+    } else {
+      return area[coords.getX()][coords.getY()];
+    }
   }
 
   private void printArea(int[][] area1) {
