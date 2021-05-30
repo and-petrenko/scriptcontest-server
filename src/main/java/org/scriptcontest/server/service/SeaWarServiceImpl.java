@@ -83,6 +83,7 @@ public class SeaWarServiceImpl implements SeaWarService {
     int currentState = area[coords.getX()][coords.getY()];
     if (currentState == CELL_SHIP) {
       area[coords.getX()][coords.getY()] = CELL_INJURED;
+      // TODO проверять, что корабль убит полностью, и если да, то заполнять ячейки вокруг
       return CELL_INJURED;
     } else if (currentState == CELL_EMPTY) {
       area[coords.getX()][coords.getY()] = CELL_MISSED;
