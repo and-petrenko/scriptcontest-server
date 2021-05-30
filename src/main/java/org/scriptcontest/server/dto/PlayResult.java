@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PlayResult {
 
-  private int winner;
+  private String winner;
 
   private String comment;
 

@@ -26,32 +26,57 @@ public class SeaWarServiceImpl implements SeaWarService {
 
   @Override
   public PlayResult doBattle() {
-    Player p1 = new Player("array.py", pythonService);
-    Player p2 = new Player("array2.py", pythonService);
+    Player p1 = new Player("Player1", "array.py", pythonService);
+    Player p2 = new Player("Player2", "array2.py", pythonService);
 
     int[][] area1 = p1.getShipsPosition();
-    printArea(area1);
     if (!checkArea(area1)) {
-      return new PlayResult(2, "Player 1 filled ships in wrong way");
+      return new PlayResult(p2.getName(), "Player 1 filled ships in wrong way");
     }
 
     int[][] area2 = p2.getShipsPosition();
     if (!checkArea(area2)) {
-      return new PlayResult(1, "Player 1 filled ships in wrong way");
+      return new PlayResult(p1.getName(), "Player 2 filled ships in wrong way");
     }
 
-    Coords coords = p1.fire(area2);
+    boolean player1 = true;
 
-    System.out.println("!!! fire=" + coords);
+    while(true) {
+      Player player = player1 ? p1 : p2;
+      int[][] otherPlayerArea = player1 ? area2 : area1;
+      boolean switchPlayer = !playRound(player, otherPlayerArea);
 
-    int newState = executeFire(coords, area2);
+      if (isAllKilled(otherPlayerArea)) {
+        System.out.println(player.getName()  + " has won. Other player's area:");
+        printArea(otherPlayerArea);
+        return new PlayResult(player.getName(), "Game over");
+      }
+
+      if (switchPlayer) {
+        player1 = !player1;
+      }
+    }
+  }
+
+  private boolean isAllKilled(int[][] otherPlayerArea) {
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        if (otherPlayerArea[i][j] == 1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private boolean playRound(Player player, int[][] otherPlayerArea) {
+    Coords coords = player.fire(otherPlayerArea);
+    System.out.println(player.getName() + " fire=" + coords);
+    int newState = executeFire(coords, otherPlayerArea);
     if (newState == CELL_INJURED) {
-      // еще раз
-    } else if (newState == CELL_MISSED) {
-      // передаем управление
+      return true;
     }
-
-    return new PlayResult(0, "We don't kow who won yet");
+    return false;
   }
 
   private int executeFire(Coords coords, int[][] area) {

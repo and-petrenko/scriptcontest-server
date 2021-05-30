@@ -1,6 +1,5 @@
 package org.scriptcontest.server.python;
 
-import org.python.core.PyInteger;
 import org.python.core.PyList;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
